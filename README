@@ -1,9 +1,15 @@
  Installation
 
-    git clone git://github.com/nelstrom/dotfiles.git
+    git clone git://github.com/Azema/dotfiles.git
 
 Create symlinks:
 
     ln -s ~/dotfiles/bashrc ~/.bashrc
-    ln -s ~/dotfiles/ctags ~/.ctags
- 
+    ln -s ~/dotfiles/conkyrc ~/.conkyrc
+    ln -s ~/dotfiles/conkyrc2 ~/.conkyrc2
+    ln -s ~/dotfiles/bin ~/bin
+
+Ne pas oublier de recharger le bashrc
+
+    source ~/.bashrc
+
