@@ -1,0 +1,61 @@
+background yes
+use_xft yes
+xftfont Comic sans MS:size=10
+xftalpha 0.8
+update_interval 1.0
+total_run_times 0
+own_window yes
+own_window_transparent yes
+own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
+double_buffer yes
+minimum_size 320 10
+draw_shades no
+draw_outline no
+draw_borders no
+stippled_borders 8
+border_inner_margin 4
+border_width 1
+default_color 4582B5
+default_shade_color black
+default_outline_color black
+alignment top_right
+gap_x 30
+gap_y 115
+no_buffers yes
+uppercase no
+cpu_avg_samples 2
+net_avg_samples 2
+#override_utf8_locale no
+#use_spacer none
+text_buffer_size 2048
+
+TEXT
+${color white}Bonjour Azema
+${color white}Nous sommes le : ${time %A %d %B %Y} - ${time %H:%M:%S}
+$nodename - $sysname $kernel on $machine
+#${stippled_hr 8 1}
+#$alignc${color white}${font :bold:size=8}Mails
+#${color #e49c16}Gmail${hr}
+#${execpi 300 ~/.scripts/imap_gmail.rb}
+#${color #e49c16}Canaltp${hr}
+#${execpi 300 ~/.scripts/imap_canaltp.rb}
+${color white}${stippled_hr 8 1}
+${color #e49c16}Uptime:$color $uptime ${color #FFFFFF}- Load:$color $loadavg
+${color #e49c16}CPU 0 Utilise :${color #FFFFFF} ${cpu cpu0}% - ${acpitemp}°C ${color #ffc11f}${cpubar cpu0}
+${color white}${cpugraph cpu0 ffc11f 8b4b0b}
+${color #e49c16}CPU 1 Utilise :${color #FFFFFF} ${cpu cpu1}% - ${acpitemp}°C ${color #ffc11f}${cpubar cpu1}
+${color white}${cpugraph cpu1 ffc11f 8b4b0b}
+${color #e49c16}Memoire RAM :${color #FFFFFF} $mem/$memmax - $memperc% ${color #ffc11f}${membar}
+${color white}${memgraph ffc11f 8b4b0b}
+${color #e49c16}Utilisation du Swap :${color #FFFFFF} $swap/$swapmax - $swapperc% ${color #ffc11f}${swapbar}
+${color #e49c16}Processus : $color $processes ${color #FFFFFF}En cour : $color $running_processes
+$color$stippled_hr
+${color #e49c16}Reseau : ${color #FFFFFF}IP Locale ${addr eth0} - IP Publique ${execi 1800 ~/.scripts/script-ip.sh}
+${color #e49c16}Download :${color white} ${downspeed eth0} k/s${color white} ${offset 80}${color #e49c16}Upload:${color white} ${upspeed eth0} k/s
+${color #FFFFFF}${downspeedgraph eth0 32,150 8b4b0b ffc11f} ${color #FFFFFF}${upspeedgraph eth0 32,150 ffc11f 8b4b0b}
+$color$stippled_hr
+${color #e49c16}Espace Disque:
+${color #FFFFFF}Root: ${color #FFFFFF}${fs_free /}/${fs_size /} ${color #ffc11f}${fs_bar /}
+${color #FFFFFF}Home: ${color #FFFFFF}${fs_free /home}/${fs_size /home} ${color #ffc11f}${fs_bar /home}
+${color #FFFFFF}Medias: ${color #FFFFFF}${fs_free /media/data}/${fs_size /media/data} ${color #ffc11f}${fs_bar /media/data}
+${color #FFFFFF}Save: ${color #FFFFFF}${fs_free /media/save}/${fs_size /media/save} ${color #ffc11f}${fs_bar /media/save}
