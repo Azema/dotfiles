@@ -1,0 +1,152 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]; then
+    echo "usage: $0 [-n|--dry-run] [-b|--branche=] site [DIR_LOCAL_PATH_SUPP-project-local]"
+    exit 1;
+fi
+
+script=$0
+site=$1
+declare -a RSYNC_OPTIONS='-avbc --safe-links --del --recursive --exclude=application.ini --exclude=*.swp --exclude=*.swo --exclude=.git* --cvs-exclude --exclude=nbproject --exclude=report --exclude=build --exclude=.DS_Store '
+declare -a DIR_LOCAL_PATH=""
+declare -a DIR_SERVER_PATH=""
+dryRun=false
+DIR_LOCAL_PATH_SUPP=false
+RSYNC='/usr/bin/rsync'
+DIR_DEV="$HOME/Dev"
+DIR_REMOTE="/home/mhervo/www"
+function usage()
+{
+    echo -e "\n$(basename $0) [-h] [-n] [--help] [--dry-run] application [path of sources]"
+    echo -e "\nVoici les sites que vous pouvez synchroniser sur dm13 :"
+    echo -e "\t- \e[1;34msatisfeo\e[0m"
+    echo -e "\t- \e[1;34mmarketeo\e[0m"
+    echo -e "\t- \e[1;34mall.marketeo\e[0m"
+    echo -e "\t- \e[1;34mapi.marketeo\e[0m"
+    echo -e "\t- \e[1;34mlibrary.marketeo\e[0m"
+    echo -e "\t- \e[1;34mlibeo\e[0m"
+    echo -e "\t- \e[1;34mttseo\e[0m"
+    echo -e "\t- \e[1;34mzend\e[0m"
+    echo -ne "\n"
+    exit 0;
+}
+
+# interpretation des parametres
+while getopts "hn-:" OPT 
+do
+    # gestion des options longues avec ou sans argument
+    [ $OPT = "-" ] && case "${OPTARG%%=*}" in
+        help) OPT="h" ;;
+        dry-run) OPT="n" ;;
+        *) echo "option longue non permise -- ${OPTARG%%=*}" >&2 ; exit 65 ;;
+    esac
+    # puis gestion des options courtes
+    case $OPT in
+        h) usage ;;
+        n) dryRun=true; RSYNC_OPTIONS="--dry-run $RSYNC_OPTIONS " ;;
+        *) usage; exit 65 ;;
+    esac
+done
+
+shift $(($OPTIND -1))
+site=$1
+
+# Recuperation d'un chemin de fichiers sources différent de celui définit pour l'application
+if [ $# -eq 2 ]&&[ -d $2 ]; then
+    DIR_LOCAL_PATH_SUPP=$2
+elif [ ! -d $2 ]; then
+    echo -e "\e[1;41mLe chemin fournit n'existe pas, veuillez le modifier et recommencer.\e[0m\n"
+    exit 1;
+fi
+
+if [ $site = "satisfeo" ]; then
+    RSYNC_OPTIONS=$RSYNC_OPTIONS'--exclude=logs --exclude=tmp --exclude=uploads'
+    DIR_LOCAL_PATH="$DIR_DEV/Digitaleo/www.satisfeo.net/"
+    DIR_SERVER_PATH="dm@dm13:$DIR_REMOTE/dev.satisfeo.net/"
+elif [ $site = "marketeo" ]; then
+    RSYNC_OPTIONS=$RSYNC_OPTIONS'--exclude=logs --exclude=tmp --exclude=uploads --exclude=ui-test* --exclude=Selenium* --include=application.orig'
+    DIR_LOCAL_PATH="$DIR_DEV/Digitaleo/ihm.marketeo.net/"
+    DIR_SERVER_PATH="dm@dm13:$DIR_REMOTE/dev.marketeo.net/"
+elif [ $site = "all.marketeo" ]; then
+    /usr/bin/clear
+    echo -e "\n\033[47m\e[1;31mDéploiement de l'IHM Marketeo\e[0m\n"
+    if [ $dryRun == true ]; then
+        $script -n 'marketeo'
+    else
+        $script 'marketeo'
+    fi
+    echo -e "\n\033[47m\e[1;31mDéploiement de l'API Marketeo\e[0m\n"
+    if [ $dryRun == true ]; then
+        $script -n 'api.marketeo'
+    else
+        $script 'api.marketeo'
+    fi
+    echo -e "\n\033[47m\e[1;31mDéploiement de la library Marketeo\e[0m\n"
+    if [ $dryRun == true ]; then
+        $script -n 'library.marketeo'
+    else
+        $script 'library.marketeo'
+    fi
+    echo -e "\n\033[47m\e[1;31mDéploiement de Libeo\e[0m\n"
+    if [ $dryRun == true ]; then
+        $script -n 'libeo'
+    else
+        $script 'libeo'
+    fi
+    exit 0;
+elif [ $site = "api.marketeo" ]; then
+    RSYNC_OPTIONS=$RSYNC_OPTIONS'--exclude=logs --exclude=tmp --exclude=uploads --include=application.orig'
+    DIR_LOCAL_PATH="$DIR_DEV/Digitaleo/api.marketeo.net/"
+    DIR_SERVER_PATH="dm@dm13:$DIR_REMOTE/dev.api.marketeo.net/"
+elif [ $site = "library.marketeo" ]; then
+    RSYNC_OPTIONS=$RSYNC_OPTIONS'--exclude=logs --exclude=tmp --exclude=uploads'
+    DIR_LOCAL_PATH="$DIR_DEV/Digitaleo/library.marketeo.net/"
+    DIR_SERVER_PATH="dm@dm13:$DIR_REMOTE/library.marketeo.net/"
+elif [ $site = "libeo" ]; then
+    RSYNC_OPTIONS=$RSYNC_OPTIONS'--exclude=logs --exclude=tmp --exclude=uploads'
+    DIR_LOCAL_PATH="$DIR_DEV/Digitaleo/libeo/"
+    DIR_SERVER_PATH="dm@dm13:$DIR_REMOTE/libeo/"
+elif [ $site = "ttseo" ]; then
+    RSYNC_OPTIONS=$RSYNC_OPTIONS'--exclude=logs --exclude=log --exclude=tmp --exclude=voices/*'
+    DIR_LOCAL_PATH="$DIR_DEV/Digitaleo/TTSeo/"
+    DIR_SERVER_PATH="dm@dm13:$DIR_REMOTE/dev.ttseo.net/"
+elif [ $site = "xhprof" ]; then
+    RSYNC_OPTIONS=$RSYNC_OPTIONS'--exclude=logs --exclude=log --exclude=tmp'
+    DIR_LOCAL_PATH="$DIR_DEV/Digitaleo/test-xhprof/"
+    DIR_SERVER_PATH="dm@dm13:$DIR_REMOTE/test-xhprof/"
+elif [ $site = "zend" ]; then
+    RSYNC_OPTIONS=$RSYNC_OPTIONS'--exclude=logs --exclude=log --exclude=tmp'
+    DIR_LOCAL_PATH="$DIR_DEV/library/Zend"
+    DIR_SERVER_PATH="dm@dm13:$DIR_REMOTE/"
+else
+    echo "Le site $site est inconnu"
+    exit 1;
+fi
+
+if [ $dryRun == true ]; then
+    echo -e "\033[44m\e[1;32mVous êtes en mode Test (aucun fichier ne sera remonté sur le serveur)\e[0m\n"
+fi
+if [ $DIR_LOCAL_PATH_SUPP = 'false' ]; then
+    echo -e "\033[44m\e[1;32mcommande:\e[0m $RSYNC $RSYNC_OPTIONS $DIR_LOCAL_PATH $DIR_SERVER_PATH\n"
+    if [ $dryRun == true ]; then
+        echo -e "\033[40m\e[1;31mVoici la liste des fichiers qui seront synchronisés\e[0m\n"
+    fi
+    $RSYNC $RSYNC_OPTIONS $DIR_LOCAL_PATH $DIR_SERVER_PATH
+else
+    echo -e "\033[44m\e[1;32mcommande:\e[0m $RSYNC $RSYNC_OPTIONS $DIR_LOCAL_PATH_SUPP $DIR_SERVER_PATH\n"
+    if [ $dryRun == true ]; then
+        echo -e "\033[40m\e[1;31mVoici la liste des fichiers qui seront synchronisés\e[0m\n"
+    fi
+    $RSYNC $RSYNC_OPTIONS $DIR_LOCAL_PATH_SUPP $DIR_SERVER_PATH
+fi
+
+if [ $? -eq 0 ]; then
+    if [ ! $dryRun == true ]; then
+        echo -e "\033[42m\e[1;36mLe site $site a bien été déployé\e[0m\n"
+    fi
+    exit 0;
+else
+    echo -e "\033[41m\e[1;30mUne erreur est apparue, veuillez la résoudre et recommencer\e[0m\n"
+    exit 1;
+fi
+

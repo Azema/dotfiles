@@ -1,0 +1,9 @@
+# Include
++ /dev/console
++ /dev/initctl
++ /dev/null
++ /dev/zero
+
+# Exclude
+- /home/azema/.VirtualBox/*
+- /media/*
