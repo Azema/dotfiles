@@ -1,0 +1,34 @@
+# pear completion
+#
+have pear &&
+{
+    _pear()
+    {
+        local cur prev commands options command
+
+        COMPREPLY=()
+        cur=${COMP_WORDS[COMP_CWORD]}
+
+        commands='build bundle channel-add channel-alias channel-delete channel-discover channel-info channel-update clear-cache config-create config-get config-help config-set config-show convert cvsdiff cvstag download download-all info install list list-all list-channels list-files list-upgrades login logout makerpm package package-dependencies package-validate pickle remote-info remote-list run-scripts run-tests search shell-test sign uninstall update-channels upgrade upgrade-all'
+
+        if [[ $COMP_CWORD -eq 1 ]] ; then
+            if [[ "$cur" == -* ]]; then
+                COMPREPLY=( $( compgen -W '-V' -- $cur ) )
+            else
+                COMPREPLY=( $( compgen -W "$commands" -- $cur ) )
+            fi
+        else
+
+            command=${COMP_WORDS[1]}
+
+            case $command in
+                run-tests)
+                _filedir 'phpt'
+                ;;
+            esac
+        fi
+
+        return 0
+    }
+    complete -F _pear $default pear
+}
