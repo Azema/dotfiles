@@ -1,34 +1,48 @@
-# pear completion
-#
-have pear &&
-{
-    _pear()
-    {
-        local cur prev commands options command
+# pear(1) completion
 
-        COMPREPLY=()
-        cur=${COMP_WORDS[COMP_CWORD]}
+#have pear && 
+#{
+_pear() {
+    local i c=1 command
+	local cur words cword prev
+	_get_comp_words_by_ref -n =: cur words cword prev
 
-        commands='build bundle channel-add channel-alias channel-delete channel-discover channel-info channel-update clear-cache config-create config-get config-help config-set config-show convert cvsdiff cvstag download download-all info install list list-all list-channels list-files list-upgrades login logout makerpm package package-dependencies package-validate pickle remote-info remote-list run-scripts run-tests search shell-test sign uninstall update-channels upgrade upgrade-all'
+    COMPREPLY=()
 
-        if [[ $COMP_CWORD -eq 1 ]] ; then
-            if [[ "$cur" == -* ]]; then
-                COMPREPLY=( $( compgen -W '-V' -- $cur ) )
-            else
-                COMPREPLY=( $( compgen -W "$commands" -- $cur ) )
-            fi
-        else
+	while [ $c -lt $cword ]; do
+		i="${words[c]}"
+		case "$i" in
+		*) command="$i"; break ;;
+		esac
+		((c++))
+	done
 
-            command=${COMP_WORDS[1]}
-
-            case $command in
-                run-tests)
-                _filedir 'phpt'
-                ;;
-            esac
-        fi
-
-        return 0
-    }
-    complete -F _pear $default pear
+    if [[ -n "$command" ]]&&[[ "$cur" == -* ]]; then
+        APWORDS=$(pear help $command | \
+            awk '{ for (i=1; i<=NF;i++) { if ( $i ~ /-.*$/ ) { print $i; } } }' | \
+        sed 's/,//g')
+        COMPREPLY=( $( compgen -W "$APWORDS" -- "$cur" ) )
+    elif [[ "$cur" == -* ]]; then
+	    APWORDS=$(pear help options | \
+		awk '{ for (i=1; i<=NF;i++) { if ( $i ~ /-.*$/ ) { print $i; } } }' | \
+        sed 's/,//g')
+        COMPREPLY=( $( compgen -W "$APWORDS" -- "$cur" ) )
+    else
+        APWORDS=$(pear help | \
+            awk 'NR>1{ if ( $1 !~ /^(Usage|Type)+/ ) print $1; }')
+        COMPREPLY=( $( compgen -W "$APWORDS" -- "$cur" ) )
+    fi
+    return 0
 }
+
+complete -o bashdefault -o default -o nospace -F _pear pear 2>/dev/null \
+    || complete -o default -o nospace -F _pear pear
+#}
+
+# Local variables:
+# mode: shell-script
+# sh-basic-offset: 4
+# sh-indent-comment: t
+# indent-tabs-mode: nil
+# End:
+# ex: ts=4 sw=4 et filetype=sh
